@@ -32,6 +32,8 @@ type Config struct {
 	Socks5Port          string `mapstructure:"socks5_port"`
 	Socks5Login         string `mapstructure:"socks5_login"`
 	Socks5Password      string `mapstructure:"socks5_password"`
+	Healthz             bool   `mapstructure:"healthz"`
+	GAEWarmup           bool   `mapstructure:"gae_warmup"`
 }
 
 var config Config
@@ -54,6 +56,30 @@ func main() {
 	}
 	log.Printf("Telegram Bot Token [%v] successfully obtained from env variable $TGTOKEN\n", token)
 
+	if config.GAEWarmup {
+		http.HandleFunc("/_ah/warmup", func(w http.ResponseWriter, r *http.Request) {
+			log.Println("warmup done")
+		})
+	}
+	if config.Healthz {
+		http.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
+			log.Println("warmup done")
+		})
+	}
+
+	if config.GAEWarmup || config.Healthz {
+		port := os.Getenv("PORT")
+		if port == "" {
+			port = "8080"
+			log.Printf("Defaulting to port %s", port)
+		}
+
+		log.Printf("Listening on port %s", port)
+		if err := http.ListenAndServe(":"+port, nil); err != nil {
+			log.Fatal(err)
+		}
+
+	}
 	var httpClient *http.Client
 	if config.UseSocks5Proxy == "yes" {
 		var err error

@@ -35,3 +35,9 @@ socks5_login = "login"
 
 # Socks5 proxy server password
 socks5_password = "password"
+
+# expose a /healthz endpoint with health status
+healthz = true
+
+# expose a /_ah/warmup endpoint for Google App Engine warmup (only useful if running on Google App Engine)
+gae_warmup = true
